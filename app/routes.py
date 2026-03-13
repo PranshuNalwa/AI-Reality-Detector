@@ -11,6 +11,7 @@ from flask import (
     request,
     abort,
     current_app,
+    jsonify
 )
 from app import app, db
 from app.models import Scan
@@ -18,6 +19,8 @@ from app.forms import UploadForm
 from app.utils.helpers import save_upload, delete_file
 from app.utils.metadata_extractor import extract_metadata
 from app.utils.image_analysis import analyze_with_sightengine
+from app.qr_checker import decode_qr_image
+from app.utils.api_clients import check_url_safety
 
 
 # ── Home / Upload ───────────────────────────────────────────────
@@ -262,3 +265,37 @@ def _build_explanations(scan, risk_level: str) -> dict:
         "non_technical": non_tech,
         "technical": tech,
     }
+
+
+@app.route('/api/scan-qr', methods=['POST'])
+def scan_qr_route():
+    if 'file' not in request.files:
+        return jsonify({"status": "error", "message": "No file uploaded."}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"status": "error", "message": "No selected file."}), 400
+
+    try:
+        # 1. Read file bytes and pass to the module
+        file_bytes = file.read()
+        decoded_data = decode_qr_image(file_bytes)
+
+        if not decoded_data:
+            return jsonify({"status": "error", "message": "No readable QR code found."}), 400
+
+        # 2. Check the data using the API client
+        if decoded_data.startswith("http://") or decoded_data.startswith("https://"):
+            safety_report = check_url_safety(decoded_data)
+            
+            if safety_report.get("is_safe"):
+                return jsonify({"status": "success", "type": "url_safe", "data": decoded_data, "message": "Safe Link"})
+            else:
+                return jsonify({"status": "warning", "type": "url_danger", "data": decoded_data, "message": f"DANGER: {safety_report.get('reason')}"})
+        else:
+            return jsonify({"status": "success", "type": "text", "data": decoded_data, "message": "Plain Text"})
+            
+    except ValueError as ve:
+        return jsonify({"status": "error", "message": str(ve)}), 400
+    except Exception as e:
+        return jsonify({"status": "error", "message": "An internal server error occurred."}), 500

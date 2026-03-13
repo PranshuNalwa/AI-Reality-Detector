@@ -161,6 +161,49 @@ img {
     align-items: center;
 }
 
+/* Tabs */
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-bottom: 2px solid transparent;
+    transition: color 0.3s, border-color 0.3s;
+}
+
+.tab-btn:hover {
+    color: var(--text-heading);
+}
+
+.tab-btn.active {
+    color: var(--accent-start);
+    border-bottom: 2px solid var(--accent-start);
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* Drop zone */
 .dropzone {
     width: 100%;

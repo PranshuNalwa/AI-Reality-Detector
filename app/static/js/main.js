@@ -4,10 +4,35 @@
  */
 
 document.addEventListener("DOMContentLoaded", () => {
+    initTabs();
     initDropzone();
+    initQrScanner();
     initMeter();
     initShareButton();
 });
+
+/* ── Tabs ─────────────────────────────────────────────────── */
+function initTabs() {
+    const tabBtns = document.querySelectorAll(".tab-btn");
+    const tabContents = document.querySelectorAll(".tab-content");
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+            // Remove active classes
+            tabBtns.forEach(t => t.classList.remove("active"));
+            tabContents.forEach(c => c.classList.remove("active"));
+
+            // Add active class to clicked tab and its content panel
+            btn.classList.add("active");
+            const targetId = `tab-${btn.dataset.tab}`;
+            const targetPanel = document.getElementById(targetId);
+            if (targetPanel) {
+                targetPanel.classList.add("active");
+            }
+        });
+    });
+}
+
 
 /* ── Drag-and-Drop + File Preview ───────────────────────────── */
 function initDropzone() {
@@ -80,6 +105,118 @@ function initDropzone() {
         reader.readAsDataURL(file);
     }
 }
+
+/* ── QR Scanner ─────────────────────────────────────────────── */
+function initQrScanner() {
+    const dropzone = document.getElementById("qr-dropzone");
+    const fileInput = document.getElementById("qr-file-input");
+    const preview = document.getElementById("qr-preview");
+    const previewImg = document.getElementById("qr-preview-img");
+    const previewName = document.getElementById("qr-preview-name");
+    const clearBtn = document.getElementById("qr-preview-clear");
+    const submitBtn = document.getElementById("qr-submit-btn");
+    const resultDiv = document.getElementById("qr-result");
+
+    if (!dropzone || !fileInput) return;
+
+    dropzone.addEventListener("click", (e) => {
+        if (e.target.tagName !== "LABEL" && e.target.tagName !== "INPUT") {
+            fileInput.click();
+        }
+    });
+
+    ["dragenter", "dragover", "dragleave", "drop"].forEach((evt) => {
+        dropzone.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); });
+    });
+
+    ["dragenter", "dragover"].forEach((evt) => {
+        dropzone.addEventListener(evt, () => dropzone.classList.add("dropzone--active"));
+    });
+    ["dragleave", "drop"].forEach((evt) => {
+        dropzone.addEventListener(evt, () => dropzone.classList.remove("dropzone--active"));
+    });
+
+    dropzone.addEventListener("drop", (e) => {
+        const files = e.dataTransfer.files;
+        if (files.length) {
+            fileInput.files = files;
+            showPreview(files[0]);
+        }
+    });
+
+    fileInput.addEventListener("change", () => {
+        if (fileInput.files.length) {
+            showPreview(fileInput.files[0]);
+        }
+    });
+
+    if (clearBtn) {
+        clearBtn.addEventListener("click", () => {
+            fileInput.value = "";
+            preview.style.display = "none";
+            dropzone.style.display = "";
+            resultDiv.style.display = "none";
+            if (submitBtn) submitBtn.disabled = true;
+        });
+    }
+
+    function showPreview(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            previewName.textContent = file.name;
+            preview.style.display = "flex";
+            dropzone.style.display = "none";
+            resultDiv.style.display = "none";
+            if (submitBtn) submitBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Handle AJAX Submission
+    if (submitBtn) {
+        submitBtn.addEventListener("click", async () => {
+            if (!fileInput.files.length) return;
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Scanning...";
+            resultDiv.style.display = "none";
+
+            try {
+                const response = await fetch("/api/scan-qr", {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await response.json();
+
+                resultDiv.style.display = "block";
+                
+                if (data.status === "error") {
+                    resultDiv.className = "alert alert--danger";
+                    resultDiv.innerHTML = `<strong>Error:</strong> ${data.message}`;
+                } else if (data.status === "success") {
+                    resultDiv.className = "alert alert--success";
+                    resultDiv.innerHTML = `<strong>${data.message}:</strong> <a href="${data.data}" target="_blank" style="word-break: break-all;">${data.data}</a>`;
+                } else if (data.status === "warning") {
+                    resultDiv.className = "alert alert--warning";
+                    resultDiv.innerHTML = `<strong>${data.message}:</strong> <span style="word-break: break-all;">${data.data}</span>`;
+                }
+
+            } catch (err) {
+                resultDiv.style.display = "block";
+                resultDiv.className = "alert alert--danger";
+                resultDiv.innerHTML = `<strong>Error:</strong> Could not reach the server.`;
+            }
+
+            submitBtn.textContent = "Scan QR";
+            submitBtn.disabled = false;
+        });
+    }
+}
+
 
 /* ── Circular Meter Animation ───────────────────────────────── */
 function initMeter() {

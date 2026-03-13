@@ -9,8 +9,16 @@
 </section>
 
 <section class="upload-section" id="upload-section">
-    <form method="POST" enctype="multipart/form-data" class="upload-form" id="upload-form">
-        {{ form.hidden_tag() }}
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="image">Image Scan</button>
+        <button class="tab-btn" data-tab="qr">QR Code Scan</button>
+    </div>
+
+    <!-- Image Scan Panel -->
+    <div class="tab-content active" id="tab-image">
+        <form method="POST" enctype="multipart/form-data" class="upload-form" id="upload-form">
+            {{ form.hidden_tag() }}
 
         <!-- Drag-and-drop zone -->
         <div class="dropzone" id="dropzone">
@@ -29,11 +37,42 @@
             <button type="button" class="btn btn--small btn--ghost" id="preview-clear">Remove</button>
         </div>
 
-        <!-- Submit -->
-        <button type="submit" class="btn btn--primary btn--lg" id="submit-btn" disabled>
-            Analyze Image
-        </button>
-    </form>
+            <!-- Submit -->
+            <button type="submit" class="btn btn--primary btn--lg" id="submit-btn" disabled>
+                Analyze Image
+            </button>
+        </form>
+    </div>
+
+    <!-- QR Scan Panel -->
+    <div class="tab-content" id="tab-qr">
+        <form id="qr-form" class="upload-form">
+            <!-- Drag-and-drop zone -->
+            <div class="dropzone" id="qr-dropzone">
+                <div class="dropzone__icon">📷</div>
+                <p class="dropzone__text">Upload QR Code</p>
+                <p class="dropzone__or">or</p>
+                <label for="qr-file-input" class="btn btn--outline">Browse Files</label>
+                <input type="file" id="qr-file-input" class="dropzone__input" accept="image/jpeg,image/png,image/webp">
+                <p class="dropzone__hint">JPG, JPEG, PNG, WEBP</p>
+            </div>
+
+            <!-- Preview (hidden by default) -->
+            <div class="preview" id="qr-preview" style="display:none;">
+                <img id="qr-preview-img" src="#" alt="Preview" class="preview__img" />
+                <p id="qr-preview-name" class="preview__name"></p>
+                <button type="button" class="btn btn--small btn--ghost" id="qr-preview-clear">Remove</button>
+            </div>
+
+            <!-- Results -->
+            <div id="qr-result" style="display:none; margin-top: 1rem; padding: 1rem; border-radius: 8px; text-align: center;"></div>
+
+            <!-- Submit -->
+            <button type="button" class="btn btn--primary btn--lg" id="qr-submit-btn" disabled>
+                Scan QR
+            </button>
+        </form>
+    </div>
 </section>
 
 <!-- How it works -->
