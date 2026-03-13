@@ -1,3 +1,4 @@
+import os
 import requests
 from flask import current_app
 
@@ -5,8 +6,10 @@ def get_factcheck_results(query):
     """
     Search for fact-check claims using the Google Fact Check Tools API.
     """
-    api_key = current_app.config.get("FACT_CHECK_API_KEY")
-    if not api_key:
+    api_key = os.environ.get("FACT_CHECK_API_KEY") or os.environ.get("GOOGLE_SAFE_BROWSING_API")
+    
+    if not api_key or api_key == "FACT_CHECK_API_KEY":
+        # Cannot connect without an API key
         return []
 
     url = "https://factchecktools.googleapis.com/v1alpha1/claims:search"
