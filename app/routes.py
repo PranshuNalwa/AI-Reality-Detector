@@ -21,6 +21,7 @@ from app.utils.metadata_extractor import extract_metadata
 from app.utils.image_analysis import analyze_with_sightengine
 from app.qr_checker import decode_qr_image, analyze_payment_qr
 from app.utils.api_clients import check_url_safety
+from app.website_checker import verify_website
 
 
 # ── Home / Upload ───────────────────────────────────────────────
@@ -311,3 +312,19 @@ def scan_qr_route():
         return jsonify({"status": "error", "message": str(ve)}), 400
     except Exception as e:
         return jsonify({"status": "error", "message": "An internal server error occurred."}), 500
+
+@app.route('/api/check-website', methods=['POST'])
+def check_website_route():
+    data = request.json
+    if not data or 'url' not in data:
+        return jsonify({"status": "error", "message": "No URL provided."}), 400
+        
+    url = data['url'].strip()
+    if not url:
+        return jsonify({"status": "error", "message": "Empty URL provided."}), 400
+         
+    try:
+        result = verify_website(url)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Server error: {str(e)}"}), 500

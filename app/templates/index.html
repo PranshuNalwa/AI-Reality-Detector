@@ -131,7 +131,8 @@
                     <label for="news-url" class="input-label">Article URL</label>
                     <div class="input-wrapper">
                         <i data-lucide="link" class="input-icon"></i>
-                        <input type="url" id="news-url" class="text-input" placeholder="https://example.com/article..." />
+                        <input type="url" id="news-url" class="text-input"
+                            placeholder="https://example.com/article..." />
                     </div>
                 </div>
                 <div class="input-divider">
@@ -139,7 +140,8 @@
                 </div>
                 <div class="input-group">
                     <label for="news-text" class="input-label">Article Text</label>
-                    <textarea id="news-text" class="text-input text-input--area" rows="6" placeholder="Paste the full article text here..."></textarea>
+                    <textarea id="news-text" class="text-input text-input--area" rows="6"
+                        placeholder="Paste the full article text here..."></textarea>
                 </div>
                 <button type="button" class="btn btn--gold btn--lg btn--full" id="news-submit-btn">
                     <i data-lucide="shield-check" class="btn__icon"></i> Check Credibility
@@ -161,7 +163,8 @@
             <form class="upload-form" id="text-form">
                 <div class="input-group">
                     <label for="text-content" class="input-label">Text Content</label>
-                    <textarea id="text-content" class="text-input text-input--area text-input--tall" rows="10" placeholder="Paste the text you want to analyze..."></textarea>
+                    <textarea id="text-content" class="text-input text-input--area text-input--tall" rows="10"
+                        placeholder="Paste the text you want to analyze..."></textarea>
                     <div class="input-meta">
                         <span id="text-char-count">0 characters</span>
                         <span>Min 100 characters recommended</span>
@@ -192,7 +195,8 @@
                     <p class="dropzone__text">Upload QR Code Image</p>
                     <span class="dropzone__or">or</span>
                     <label for="qr-file-input" class="btn btn--outline-gold btn--sm">Browse Files</label>
-                    <input type="file" id="qr-file-input" class="dropzone__input" accept="image/jpeg,image/png,image/webp" />
+                    <input type="file" id="qr-file-input" class="dropzone__input"
+                        accept="image/jpeg,image/png,image/webp" />
                     <p class="dropzone__hint">JPG, PNG, WEBP</p>
                 </div>
                 <div class="preview" id="qr-preview" style="display:none;">
@@ -223,9 +227,11 @@
                     <label for="website-url" class="input-label">Website URL</label>
                     <div class="input-wrapper">
                         <i data-lucide="globe" class="input-icon"></i>
-                        <input type="url" id="website-url" class="text-input" placeholder="https://suspicious-site.com" />
+                        <input type="url" id="website-url" class="text-input"
+                            placeholder="https://suspicious-site.com" />
                     </div>
                 </div>
+                <div id="website-result" class="result-box" style="display:none; margin-bottom: 20px;"></div>
                 <button type="button" class="btn btn--gold btn--lg btn--full" id="website-submit-btn">
                     <i data-lucide="search" class="btn__icon"></i> Verify Website
                 </button>
@@ -277,7 +283,7 @@
             <div class="pricing-card__header">
                 <h3 class="pricing-card__name">Free</h3>
                 <div class="pricing-card__price">
-                    <span class="pricing-card__amount">$0</span>
+                    <span class="pricing-card__amount">₹0</span>
                     <span class="pricing-card__period">/month</span>
                 </div>
                 <p class="pricing-card__desc">Get started with basic verification</p>
@@ -299,7 +305,7 @@
             <div class="pricing-card__header">
                 <h3 class="pricing-card__name">Basic</h3>
                 <div class="pricing-card__price">
-                    <span class="pricing-card__amount">$19</span>
+                    <span class="pricing-card__amount">₹199</span>
                     <span class="pricing-card__period">/month</span>
                 </div>
                 <p class="pricing-card__desc">Perfect for professionals and researchers</p>
@@ -320,7 +326,7 @@
             <div class="pricing-card__header">
                 <h3 class="pricing-card__name">Pro</h3>
                 <div class="pricing-card__price">
-                    <span class="pricing-card__amount">$49</span>
+                    <span class="pricing-card__amount">₹499</span>
                     <span class="pricing-card__period">/month</span>
                 </div>
                 <p class="pricing-card__desc">Enterprise-grade detection suite</p>

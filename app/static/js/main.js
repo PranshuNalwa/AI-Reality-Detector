@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavLinks();
     initMeter();
     initShareBtn();
+    initWebsiteCheck();
 });
 
 
@@ -230,6 +231,82 @@ function initQrUpload() {
                         <p style="margin-bottom: 5px; color: #f0ece4;"><strong>UPI ID (VPA):</strong> ${data.details.payee_vpa}</p>
                         <p style="margin-bottom: 5px; color: #f0ece4;"><strong>Amount (INR):</strong> ${data.details.amount}</p>
                         <p style="margin-top: 10px; font-size: 0.85em; opacity: 0.8; word-break: break-all; color: #f0ece4;">Raw URI: ${data.data}</p>
+                    </div>
+                `;
+            }
+
+            if (window.lucide) lucide.createIcons();
+
+        } catch (err) {
+            resultDiv.style.display = "block";
+            resultDiv.className = "alert alert--danger";
+            resultDiv.innerHTML = `<strong>Error:</strong> Could not reach the server.`;
+        }
+
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        if (window.lucide) lucide.createIcons();
+    });
+}
+
+/* ── Website Verification AJAX Submission ──────────────── */
+function initWebsiteCheck() {
+    const submitBtn = document.getElementById('website-submit-btn');
+    const inputField = document.getElementById('website-url');
+    const resultDiv = document.getElementById('website-result');
+
+    if (!submitBtn || !inputField || !resultDiv) return;
+
+    submitBtn.addEventListener('click', async () => {
+        const url = inputField.value.trim();
+        if (!url) {
+            resultDiv.style.display = "block";
+            resultDiv.className = "alert alert--danger";
+            resultDiv.innerHTML = `<strong>Error:</strong> Please enter a valid URL.`;
+            return;
+        }
+
+        submitBtn.disabled = true;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i data-lucide="loader" class="btn__icon spinner"></i> Verifying...';
+        if (window.lucide) lucide.createIcons();
+        
+        resultDiv.style.display = "none";
+
+        try {
+            const response = await fetch("/api/check-website", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ url: url })
+            });
+            const data = await response.json();
+
+            resultDiv.style.display = "block";
+            
+            if (data.status === "error") {
+                resultDiv.className = "alert alert--danger";
+                resultDiv.innerHTML = `<strong>Error:</strong> ${data.message}`;
+            } else if (data.status === "success") {
+                resultDiv.className = "alert alert--success";
+                resultDiv.innerHTML = `<strong>${data.message}</strong> <br><span style="word-break: break-all; font-size: 0.9em; opacity: 0.8;">Domain: ${data.details.domain}</span>`;
+            } else if (data.status === "warning") {
+                resultDiv.className = "alert alert--warning";
+                resultDiv.innerHTML = `<strong>${data.message}</strong> <br><span style="word-break: break-all; font-size: 0.9em; opacity: 0.8;">${data.details.reason}</span>`;
+            } else if (data.status === "danger") {
+                resultDiv.className = "alert alert--danger";
+                resultDiv.style.borderWidth = "2px";
+                resultDiv.style.padding = "20px";
+                resultDiv.innerHTML = `
+                    <div style="font-size: 1.2rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">
+                        <i data-lucide="shield-alert" style="vertical-align: middle; margin-right: 8px;"></i>
+                        <strong>${data.message}</strong>
+                    </div>
+                    <div style="text-align: left; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                        <p style="margin-bottom: 5px; color: #f0ece4;"><strong>Domain:</strong> ${data.details.domain}</p>
+                        <p style="margin-bottom: 5px; color: #f0ece4;"><strong>Threat Type:</strong> ${data.details.reason}</p>
+                        <p style="margin-top: 10px; font-size: 0.85em; opacity: 0.8; word-break: break-all; color: #f0ece4;">Checked URL: ${data.data}</p>
                     </div>
                 `;
             }
