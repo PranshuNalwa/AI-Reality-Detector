@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="AI Reality Distortion Detector — Upload an image and find out if it's AI-generated, manipulated, or authentic." />
+    <title>{% block title %}AI Reality Detector{% endblock %}</title>
+
+    <!-- Google Fonts — Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+
+    <!-- App stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+
+<body>
+    <!-- ── Navbar ─────────────────────────────────────────── -->
+    <nav class="navbar" id="main-nav">
+        <a href="{{ url_for('index') }}" class="navbar__brand">
+            <span class="navbar__icon">◈</span>
+            <span class="navbar__title">AI Reality Detector</span>
+        </a>
+        <div class="navbar__links">
+            <a href="{{ url_for('index') }}">Analyze</a>
+            <a href="{{ url_for('history') }}">History</a>
+        </div>
+    </nav>
+
+    <!-- ── Flash messages ─────────────────────────────────── -->
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert--{{ category }}" role="alert">
+            {{ message }}
+            <button class="alert__close" onclick="this.parentElement.remove()">×</button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- ── Main content ───────────────────────────────── -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- ── Footer ─────────────────────────────────────────── -->
+    <footer class="footer">
+        <p>&copy; 2026 AI Reality Distortion Detector &middot; Built with Flask &amp; Sightengine</p>
+    </footer>
+
+    <!-- App JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+</body>
+
+</html>

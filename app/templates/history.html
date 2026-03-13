@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Scan History — AI Reality Detector{% endblock %}
+
+{% block content %}
+<section class="history">
+    <h1 class="history__heading">Scan History</h1>
+    <p class="history__sub">All past image analyses, newest first.</p>
+
+    {% if scans %}
+    <div class="table-wrap">
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Filename</th>
+                    <th>Score</th>
+                    <th>Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for scan in scans %}
+                <tr>
+                    <td>{{ scan.id }}</td>
+                    <td class="ellipsis">{{ scan.filename }}</td>
+                    <td>
+                        <span
+                            class="badge badge--{% if scan.manipulation_score < 30 %}low{% elif scan.manipulation_score < 70 %}medium{% else %}high{% endif %}">
+                            {{ scan.manipulation_score }}
+                        </span>
+                    </td>
+                    <td>{{ scan.created_at.strftime('%b %d, %Y %H:%M') }}</td>
+                    <td><a href="{{ url_for('result', scan_id=scan.id) }}" class="btn btn--small btn--outline">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No scans yet. <a href="{{ url_for('index') }}">Upload an image</a> to get started.</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

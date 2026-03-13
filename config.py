@@ -1,26 +1,31 @@
+"""
+Application configuration.
+Loads sensitive values from .env via python-dotenv.
+"""
+
 import os
 from dotenv import load_dotenv
 
+# Load environment variables from .env file
 load_dotenv()
 
 
 class Config:
-    """Application configuration loaded from environment variables."""
+    """Base configuration class."""
 
-    SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
+    # Flask secret key for session management and CSRF protection
+    SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
 
-    # ── Database ──────────────────────────────────────────────
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DATABASE_URL", "sqlite:///ai_reality_detector.db"
-    )
+    # SQLAlchemy settings
+    SQLALCHEMY_DATABASE_URI = "sqlite:///site.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # ── File Uploads ──────────────────────────────────────────
+    # Sightengine API credentials
+    SIGHTENGINE_API_USER = os.getenv("SIGHTENGINE_API_USER", "")
+    SIGHTENGINE_API_SECRET = os.getenv("SIGHTENGINE_API_SECRET", "")
+
+    # File upload settings
     UPLOAD_FOLDER = os.path.join(
-        os.path.abspath(os.path.dirname(__file__)), "app", "static", "uploads"
+        os.path.dirname(os.path.abspath(__file__)), "app", "static", "uploads"
     )
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB
-
-    # ── Sightengine API ───────────────────────────────────────
-    SIGHTENGINE_API_USER = os.environ.get("SIGHTENGINE_API_USER", "")
-    SIGHTENGINE_API_SECRET = os.environ.get("SIGHTENGINE_API_SECRET", "")
