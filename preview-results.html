@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Result Preview — AI Reality Detector</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="app/static/css/style.css" />
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar scrolled" id="main-nav">
+        <a href="preview.html" class="navbar__brand">
+            <span class="navbar__icon">◈</span>
+            <span class="navbar__title">AI Reality Detector</span>
+        </a>
+        <div class="navbar__links">
+            <a href="preview.html">Analyze</a>
+            <a href="preview-results.html">Results</a>
+        </div>
+        <a href="#" class="navbar__premium-btn">Get Premium</a>
+    </nav>
+
+    <!-- Results Page -->
+    <section class="results-page">
+        <div class="results-page__header">
+            <a href="preview.html" class="results-back-link">
+                <i data-lucide="arrow-left" class="results-back-icon"></i>
+                Back to Analyzer
+            </a>
+            <h1 class="results-page__title">Analysis <span class="gold-text">Results</span></h1>
+            <p class="results-page__meta">Scan #42 &middot; test_portrait.jpg &middot; Mar 13, 2026 at 17:30</p>
+        </div>
+
+        <div class="results-grid">
+            <!-- Score card -->
+            <div class="r-card r-card--score">
+                <h2 class="r-card__label">Manipulation Score</h2>
+                <div class="meter" id="meter" data-score="73" data-risk="high">
+                    <svg viewBox="0 0 120 120" class="meter__svg">
+                        <circle class="meter__track" cx="60" cy="60" r="52" />
+                        <circle class="meter__fill" cx="60" cy="60" r="52" stroke-dasharray="326.73" stroke-dashoffset="326.73" />
+                    </svg>
+                    <div class="meter__value">
+                        <span class="meter__number" id="meter-number">0</span>
+                        <span class="meter__unit">/ 100</span>
+                    </div>
+                </div>
+                <span class="risk-badge risk-badge--high">
+                    <i data-lucide="shield-alert" class="risk-badge__icon"></i>
+                    High Risk
+                </span>
+            </div>
+
+            <!-- Verdict card -->
+            <div class="r-card r-card--verdict">
+                <h2 class="r-card__label">Verdict</h2>
+                <div class="verdict-content verdict-content--high">
+                    <i data-lucide="x-circle" class="verdict-icon"></i>
+                    <p class="verdict-text">This image is very likely AI-generated or heavily manipulated.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Explanations -->
+        <div class="explanation-grid">
+            <div class="r-card r-card--explain">
+                <div class="r-card__head">
+                    <i data-lucide="message-circle" class="r-card__head-icon"></i>
+                    <div>
+                        <h2 class="r-card__label">What This Means</h2>
+                        <p class="r-card__sublabel">Plain-language explanation</p>
+                    </div>
+                </div>
+                <ul class="explain-list">
+                    <li class="explain-list__item">
+                        <i data-lucide="info" class="explain-list__icon"></i>
+                        <span>Our AI is highly confident this image was created by an AI model rather than captured with a real camera.</span>
+                    </li>
+                    <li class="explain-list__item">
+                        <i data-lucide="info" class="explain-list__icon"></i>
+                        <span>AI-generated images often have subtle patterns in textures, lighting, and fine details that differ from real photos.</span>
+                    </li>
+                    <li class="explain-list__item">
+                        <i data-lucide="info" class="explain-list__icon"></i>
+                        <span>No camera information (EXIF data) was found in this image. Real photos usually contain this data.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="r-card r-card--explain r-card--tech">
+                <div class="r-card__head">
+                    <i data-lucide="cpu" class="r-card__head-icon"></i>
+                    <div>
+                        <h2 class="r-card__label">Technical Analysis</h2>
+                        <p class="r-card__sublabel">Detailed signals and methodology</p>
+                    </div>
+                </div>
+                <ul class="explain-list explain-list--tech">
+                    <li class="explain-list__item">
+                        <i data-lucide="terminal" class="explain-list__icon"></i>
+                        <span>AI-generation probability: 73% — Sightengine's genai classifier analyses pixel-level artefacts and frequency-domain anomalies.</span>
+                    </li>
+                    <li class="explain-list__item">
+                        <i data-lucide="terminal" class="explain-list__icon"></i>
+                        <span>Authentic-photo probability: 27% — measures sensor noise consistency and JPEG compression artefact alignment.</span>
+                    </li>
+                    <li class="explain-list__item">
+                        <i data-lucide="terminal" class="explain-list__icon"></i>
+                        <span>EXIF metadata: absent. No Exchangeable Image File Format headers were found.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- EXIF Metadata -->
+        <div class="r-card r-card--meta">
+            <div class="r-card__head">
+                <i data-lucide="database" class="r-card__head-icon"></i>
+                <div>
+                    <h2 class="r-card__label">EXIF Metadata</h2>
+                    <p class="r-card__sublabel">Embedded image information</p>
+                </div>
+            </div>
+            <p class="r-card__empty">No EXIF metadata available for this image.</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="results-actions">
+            <a href="preview.html" class="btn btn--gold btn--lg">
+                <i data-lucide="scan" class="btn__icon"></i> Analyze Another Image
+            </a>
+            <button class="btn btn--outline-gold btn--lg" id="share-btn" data-url="#">
+                <i data-lucide="share-2" class="btn__icon"></i> Share Result
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer__inner">
+            <div class="footer__brand">
+                <span class="navbar__icon">◈</span>
+                <span>AI Reality Detector</span>
+            </div>
+            <p class="footer__copy">&copy; 2026 AI Reality Detector &middot; Brogrammers</p>
+            <div class="footer__links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+    <script src="app/static/js/main.js" defer></script>
+</body>
+</html>

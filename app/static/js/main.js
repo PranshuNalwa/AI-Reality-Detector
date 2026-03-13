@@ -16,7 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initTextCounter();
     initMobileNav();
     initNavLinks();
+    initMeter();
+    initShareBtn();
 });
+
 
 /* ── Navbar Scroll Effect ──────────────────────────────── */
 function initNavbar() {
@@ -232,7 +235,7 @@ function animateCount(el) {
 /* ── Scroll Reveal ─────────────────────────────────────── */
 function initScrollReveal() {
     const elements = document.querySelectorAll(
-        '.section-header, .step-card, .pricing-card, .panel-card, .stats-bar'
+        '.section-header, .step-card, .pricing-card, .panel-card, .stats-bar, .r-card, .results-page__header, .history-page__header'
     );
 
     elements.forEach(el => el.classList.add('reveal'));
@@ -280,5 +283,68 @@ function initMobileNav() {
             overlay.classList.remove('open');
             document.body.style.overflow = '';
         });
+    });
+}
+
+/* ── Score Meter Animation (Results Page) ──────────────── */
+function initMeter() {
+    const meter = document.getElementById('meter');
+    if (!meter) return;
+
+    const score = parseFloat(meter.getAttribute('data-score')) || 0;
+    const fill = meter.querySelector('.meter__fill');
+    const numberEl = document.getElementById('meter-number');
+    const circumference = 326.73;
+
+    // Animate after a short delay
+    setTimeout(() => {
+        const offset = circumference - (circumference * score / 100);
+        fill.style.strokeDashoffset = offset;
+
+        // Animate the number
+        const duration = 1500;
+        const startTime = performance.now();
+
+        function updateNumber(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            numberEl.textContent = Math.round(eased * score);
+            if (progress < 1) requestAnimationFrame(updateNumber);
+        }
+        requestAnimationFrame(updateNumber);
+    }, 300);
+}
+
+/* ── Share Button (Results Page) ───────────────────────── */
+function initShareBtn() {
+    const shareBtn = document.getElementById('share-btn');
+    if (!shareBtn) return;
+
+    shareBtn.addEventListener('click', async () => {
+        const url = shareBtn.getAttribute('data-url') || window.location.href;
+
+        try {
+            if (navigator.share) {
+                await navigator.share({ title: 'AI Reality Detector Result', url });
+            } else {
+                await navigator.clipboard.writeText(url);
+                const original = shareBtn.innerHTML;
+                shareBtn.innerHTML = '<i data-lucide="check" class="btn__icon"></i> Copied!';
+                if (window.lucide) lucide.createIcons();
+                setTimeout(() => {
+                    shareBtn.innerHTML = original;
+                    if (window.lucide) lucide.createIcons();
+                }, 2000);
+            }
+        } catch {
+            // Fallback for older browsers
+            const ta = document.createElement('textarea');
+            ta.value = url;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+        }
     });
 }

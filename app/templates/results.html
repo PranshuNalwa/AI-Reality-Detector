@@ -2,79 +2,112 @@
 {% block title %}Result #{{ scan.id }} — AI Reality Detector{% endblock %}
 
 {% block content %}
-<section class="results">
-    <h1 class="results__heading">Analysis Results</h1>
-    <p class="results__sub">Scan #{{ scan.id }} &middot; {{ scan.filename }} &middot; {{ scan.created_at.strftime('%b
-        %d, %Y at %H:%M') }}</p>
+<section class="results-page">
+    <!-- ── Header ──────────────────────────────────────── -->
+    <div class="results-page__header">
+        <a href="{{ url_for('index') }}" class="results-back-link">
+            <i data-lucide="arrow-left" class="results-back-icon"></i>
+            Back to Analyzer
+        </a>
+        <h1 class="results-page__title">Analysis <span class="gold-text">Results</span></h1>
+        <p class="results-page__meta">
+            Scan #{{ scan.id }} &middot; {{ scan.filename }} &middot;
+            {{ scan.created_at.strftime('%b %d, %Y at %H:%M') }}
+        </p>
+    </div>
 
+    <!-- ── Score + Verdict Row ─────────────────────────── -->
     <div class="results-grid">
-        <!-- ── Score card ────────────────────────────────── -->
-        <div class="card card--score">
-            <h2 class="card__title">Manipulation Score</h2>
-
-            <!-- Circular meter -->
+        <!-- Score card -->
+        <div class="r-card r-card--score">
+            <h2 class="r-card__label">Manipulation Score</h2>
             <div class="meter" id="meter" data-score="{{ scan.manipulation_score }}" data-risk="{{ risk_level }}">
                 <svg viewBox="0 0 120 120" class="meter__svg">
                     <circle class="meter__track" cx="60" cy="60" r="52" />
-                    <circle class="meter__fill" cx="60" cy="60" r="52" stroke-dasharray="326.73"
-                        stroke-dashoffset="326.73" />
+                    <circle class="meter__fill" cx="60" cy="60" r="52"
+                            stroke-dasharray="326.73" stroke-dashoffset="326.73" />
                 </svg>
                 <div class="meter__value">
                     <span class="meter__number" id="meter-number">0</span>
-                    <span class="meter__label">/ 100</span>
+                    <span class="meter__unit">/ 100</span>
                 </div>
             </div>
-
-            <span class="badge badge--{{ risk_level }}">
+            <span class="risk-badge risk-badge--{{ risk_level }}">
+                <i data-lucide="{% if risk_level == 'low' %}shield-check{% elif risk_level == 'medium' %}alert-triangle{% else %}shield-alert{% endif %}" class="risk-badge__icon"></i>
                 {% if risk_level == 'low' %}Low Risk
                 {% elif risk_level == 'medium' %}Medium Risk
                 {% else %}High Risk{% endif %}
             </span>
         </div>
 
-        <!-- ── Verdict card ─────────────────────────────── -->
-        <div class="card card--findings">
-            <h2 class="card__title">Verdict</h2>
-            <p class="verdict verdict--{{ risk_level }}">{{ explanations.verdict }}</p>
+        <!-- Verdict card -->
+        <div class="r-card r-card--verdict">
+            <h2 class="r-card__label">Verdict</h2>
+            <div class="verdict-content verdict-content--{{ risk_level }}">
+                <i data-lucide="{% if risk_level == 'low' %}check-circle{% elif risk_level == 'medium' %}alert-circle{% else %}x-circle{% endif %}" class="verdict-icon"></i>
+                <p class="verdict-text">{{ explanations.verdict }}</p>
+            </div>
         </div>
     </div>
 
-    <!-- ── Explanation cards (side by side) ───────────────── -->
+    <!-- ── Explanations Row ────────────────────────────── -->
     <div class="explanation-grid">
         <!-- Non-technical -->
-        <div class="card card--explain">
-            <h2 class="card__title">What This Means</h2>
-            <p class="card__subtitle">Plain-language explanation</p>
+        <div class="r-card r-card--explain">
+            <div class="r-card__head">
+                <i data-lucide="message-circle" class="r-card__head-icon"></i>
+                <div>
+                    <h2 class="r-card__label">What This Means</h2>
+                    <p class="r-card__sublabel">Plain-language explanation</p>
+                </div>
+            </div>
             {% if explanations.non_technical %}
             <ul class="explain-list">
                 {% for item in explanations.non_technical %}
-                <li class="explain-list__item">{{ item }}</li>
+                <li class="explain-list__item">
+                    <i data-lucide="info" class="explain-list__icon"></i>
+                    <span>{{ item }}</span>
+                </li>
                 {% endfor %}
             </ul>
             {% else %}
-            <p class="text-muted">No explanation available.</p>
+            <p class="r-card__empty">No explanation available.</p>
             {% endif %}
         </div>
 
         <!-- Technical -->
-        <div class="card card--explain card--explain-tech">
-            <h2 class="card__title">Technical Analysis</h2>
-            <p class="card__subtitle">Detailed signals and methodology</p>
+        <div class="r-card r-card--explain r-card--tech">
+            <div class="r-card__head">
+                <i data-lucide="cpu" class="r-card__head-icon"></i>
+                <div>
+                    <h2 class="r-card__label">Technical Analysis</h2>
+                    <p class="r-card__sublabel">Detailed signals and methodology</p>
+                </div>
+            </div>
             {% if explanations.technical %}
             <ul class="explain-list explain-list--tech">
                 {% for item in explanations.technical %}
-                <li class="explain-list__item">{{ item }}</li>
+                <li class="explain-list__item">
+                    <i data-lucide="terminal" class="explain-list__icon"></i>
+                    <span>{{ item }}</span>
+                </li>
                 {% endfor %}
             </ul>
             {% else %}
-            <p class="text-muted">No technical data available.</p>
+            <p class="r-card__empty">No technical data available.</p>
             {% endif %}
         </div>
     </div>
 
-    <!-- ── Metadata table ────────────────────────────────── -->
-    <div class="card card--meta">
-        <h2 class="card__title">EXIF Metadata</h2>
+    <!-- ── EXIF Metadata ───────────────────────────────── -->
+    <div class="r-card r-card--meta">
+        <div class="r-card__head">
+            <i data-lucide="database" class="r-card__head-icon"></i>
+            <div>
+                <h2 class="r-card__label">EXIF Metadata</h2>
+                <p class="r-card__sublabel">Embedded image information</p>
+            </div>
+        </div>
         {% if scan.metadata_json %}
         <div class="table-wrap">
             <table class="meta-table">
@@ -87,7 +120,7 @@
                 <tbody>
                     {% for key, value in scan.metadata_json.items() %}
                     <tr>
-                        <td>{{ key }}</td>
+                        <td class="meta-table__key">{{ key }}</td>
                         <td>{{ value }}</td>
                     </tr>
                     {% endfor %}
@@ -95,17 +128,17 @@
             </table>
         </div>
         {% else %}
-        <p class="text-muted">No EXIF metadata available for this image.</p>
+        <p class="r-card__empty">No EXIF metadata available for this image.</p>
         {% endif %}
     </div>
 
-    <!-- ── Actions ───────────────────────────────────────── -->
+    <!-- ── Actions ─────────────────────────────────────── -->
     <div class="results-actions">
-        <a href="{{ url_for('index') }}" class="btn btn--primary">
-            Analyze Another Image
+        <a href="{{ url_for('index') }}" class="btn btn--gold btn--lg">
+            <i data-lucide="scan" class="btn__icon"></i> Analyze Another Image
         </a>
-        <button class="btn btn--outline" id="share-btn" data-url="{{ request.url }}">
-            Share Result
+        <button class="btn btn--outline-gold btn--lg" id="share-btn" data-url="{{ request.url }}">
+            <i data-lucide="share-2" class="btn__icon"></i> Share Result
         </button>
     </div>
 </section>

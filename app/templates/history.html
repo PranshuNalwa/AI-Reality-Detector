@@ -2,44 +2,59 @@
 {% block title %}Scan History — AI Reality Detector{% endblock %}
 
 {% block content %}
-<section class="history">
-    <h1 class="history__heading">Scan History</h1>
-    <p class="history__sub">All past image analyses, newest first.</p>
+<section class="history-page">
+    <div class="history-page__header">
+        <a href="{{ url_for('index') }}" class="results-back-link">
+            <i data-lucide="arrow-left" class="results-back-icon"></i>
+            Back to Analyzer
+        </a>
+        <h1 class="history-page__title">Scan <span class="gold-text">History</span></h1>
+        <p class="history-page__sub">All past image analyses, newest first.</p>
+    </div>
 
     {% if scans %}
-    <div class="table-wrap">
-        <table class="history-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Filename</th>
-                    <th>Score</th>
-                    <th>Date</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for scan in scans %}
-                <tr>
-                    <td>{{ scan.id }}</td>
-                    <td class="ellipsis">{{ scan.filename }}</td>
-                    <td>
-                        <span
-                            class="badge badge--{% if scan.manipulation_score < 30 %}low{% elif scan.manipulation_score < 70 %}medium{% else %}high{% endif %}">
-                            {{ scan.manipulation_score }}
-                        </span>
-                    </td>
-                    <td>{{ scan.created_at.strftime('%b %d, %Y %H:%M') }}</td>
-                    <td><a href="{{ url_for('result', scan_id=scan.id) }}" class="btn btn--small btn--outline">View</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="r-card">
+        <div class="table-wrap">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Filename</th>
+                        <th>Score</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scan in scans %}
+                    <tr>
+                        <td class="history-table__id">{{ scan.id }}</td>
+                        <td class="history-table__file">{{ scan.filename }}</td>
+                        <td>
+                            <span class="risk-badge risk-badge--{% if scan.manipulation_score < 30 %}low{% elif scan.manipulation_score < 70 %}medium{% else %}high{% endif %}">
+                                {{ scan.manipulation_score }}
+                            </span>
+                        </td>
+                        <td class="history-table__date">{{ scan.created_at.strftime('%b %d, %Y %H:%M') }}</td>
+                        <td>
+                            <a href="{{ url_for('result', scan_id=scan.id) }}" class="btn btn--outline-gold btn--sm">
+                                <i data-lucide="eye" class="btn__icon"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
     {% else %}
     <div class="empty-state">
-        <p>No scans yet. <a href="{{ url_for('index') }}">Upload an image</a> to get started.</p>
+        <i data-lucide="inbox" class="empty-state__icon"></i>
+        <h3>No scans yet</h3>
+        <p>Upload an image to get started with your first analysis.</p>
+        <a href="{{ url_for('index') }}" class="btn btn--gold btn--lg">
+            <i data-lucide="upload-cloud" class="btn__icon"></i> Upload Image
+        </a>
     </div>
     {% endif %}
 </section>
