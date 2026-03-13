@@ -502,26 +502,77 @@ function initShareBtn() {
 }
 
 /* ── Fact Check AJAX Submission ────────────────────────── */
+const newsTranslations = {
+    hi: {
+        error: "त्रुटि",
+        enter_query: "कृपया समाचार लेख का URL दर्ज करें या लेख पेस्ट करें।",
+        verifying: "पुष्टि की जा रही है...",
+        analysis_for: "विश्लेषण का विषय:",
+        related_news: "संबंधित समाचार लेख",
+        fact_checks: "तथ्य जांच परिणाम (Fact Checks)",
+        no_results: "कोई संदिग्ध दावा नहीं मिला",
+        no_results_desc: "हमारे डेटाबेस में इस विषय के लिए कोई ज्ञात विवाद नहीं हैं।",
+        read_more: "पूरी रिपोर्ट देखें",
+        source: "स्रोत",
+        rating: "रेटिंग",
+        query: "प्रश्न"
+    },
+    en: {
+        error: "Error",
+        enter_query: "Please enter a news article URL or paste text.",
+        verifying: "Verifying...",
+        analysis_for: "Analysis for:",
+        related_news: "Related News Articles",
+        fact_checks: "Fact Check Results",
+        no_results: "No Suspicious Claims Found",
+        no_results_desc: "Our database shows no known disputes or fact-checks for this topic.",
+        read_more: "View Full Report",
+        source: "Source",
+        rating: "Rating",
+        query: "Query"
+    }
+};
+
+let newsCurrentLang = 'en';
+
 function initFactCheck() {
     const newsSubmitBtn = document.getElementById('news-submit-btn');
     const newsText = document.getElementById('news-text');
     const newsUrl = document.getElementById('news-url');
     const newsResult = document.getElementById('news-result');
+    const langBtns = document.querySelectorAll('#news-lang-toggle .lang-btn');
 
     if (!newsSubmitBtn || !newsResult) return;
 
+    // Language Toggle Handling
+    langBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            langBtns.forEach(b => {
+                b.classList.remove('active');
+                b.style.background = 'transparent';
+                b.style.color = '#f0ece4';
+            });
+            btn.classList.add('active');
+            btn.style.background = '#a67c00';
+            btn.style.color = '#000';
+            newsCurrentLang = btn.getAttribute('data-lang');
+        });
+    });
+
     newsSubmitBtn.addEventListener('click', async () => {
         const query = (newsText ? newsText.value.trim() : "") || (newsUrl ? newsUrl.value.trim() : "");
+        const t = newsTranslations[newsCurrentLang];
+
         if (!query) {
             newsResult.style.display = "block";
             newsResult.className = "alert alert--danger";
-            newsResult.innerHTML = `<strong>Error:</strong> Please enter a news article URL or paste text.`;
+            newsResult.innerHTML = `<strong>${t.error}:</strong> ${t.enter_query}`;
             return;
         }
 
         newsSubmitBtn.disabled = true;
         const originalText = newsSubmitBtn.innerHTML;
-        newsSubmitBtn.innerHTML = '<i data-lucide="loader" class="btn__icon spinner"></i> Checking...';
+        newsSubmitBtn.innerHTML = `<i data-lucide="loader" class="btn__icon spinner"></i> ${t.verifying}`;
         if (window.lucide) lucide.createIcons();
         
         newsResult.style.display = "none";
@@ -529,40 +580,139 @@ function initFactCheck() {
         try {
             const response = await fetch("/api/fact-check", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ query: query })
             });
-            const data = await response.json();
+            const { data, status } = await response.json();
 
             newsResult.style.display = "block";
             
-            if (data.status === "error") {
+            if (status === "error") {
                 newsResult.className = "alert alert--danger";
-                newsResult.innerHTML = `<strong>Error:</strong> ${data.message}`;
-            } else if (data.status === "success") {
-                if (data.results && data.results.length > 0) {
-                    newsResult.className = "alert alert--warning";
-                    let resultsHtml = `<strong>${data.message}</strong><div style="margin-top: 15px; display: grid; gap: 10px;">`;
+                newsResult.innerHTML = `<strong>${t.error}:</strong> ${t.enter_query}`;
+            } else {
+                const results = data.fact_checks || [];
+                const news = data.related_news || [];
+                const queryUsed = data.query_used || query;
+                const score = data.credibility_score || 0;
+                const verdict = data.verdict || "INCONCLUSIVE";
+
+                // 1. Animate Score Meter
+                const scoreContainer = document.getElementById('news-score-container');
+                const scoreValue = document.getElementById('news-score-value');
+                const meterFill = document.getElementById('news-meter-fill');
+                const meterEl = document.getElementById('news-meter');
+                const verdictBadge = document.getElementById('news-verdict-badge');
+                const verdictText = document.getElementById('news-verdict-text');
+
+                if (scoreContainer) {
+                    scoreContainer.style.display = "block";
                     
-                    data.results.forEach(res => {
-                        resultsHtml += `
-                            <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 6px; text-align: left;">
-                                <p style="margin-bottom: 5px; font-size: 0.95em;"><strong>Claim:</strong> ${res.claim}</p>
-                                <p style="margin-bottom: 5px; font-size: 0.9em; color: #f0ece4;"><strong>Rating:</strong> <span style="color: #ffcc00">${res.rating}</span></p>
-                                <p style="margin-bottom: 5px; font-size: 0.85em; opacity: 0.8;"><strong>Source:</strong> ${res.publisher}</p>
-                                <a href="${res.url}" target="_blank" style="font-size: 0.8em; color: #a67c00; text-decoration: underline;">View Full Review</a>
+                    // Risk level coloring
+                    let risk = "medium";
+                    if (score >= 70) risk = "low";
+                    else if (score <= 35) risk = "high";
+                    if (meterEl) meterEl.setAttribute('data-risk', risk);
+
+                    // Animate number
+                    let currentScore = 0;
+                    const duration = 1500;
+                    const startTime = performance.now();
+
+                    function animateScore(now) {
+                        const elapsed = now - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        currentScore = Math.floor(progress * score);
+                        if (scoreValue) scoreValue.textContent = currentScore;
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animateScore);
+                        }
+                    }
+                    requestAnimationFrame(animateScore);
+
+                    // Animate circle
+                    const radius = 45;
+                    const circumference = 2 * Math.PI * radius;
+                    if (meterFill) {
+                        const offset = circumference - (score / 100) * circumference;
+                        meterFill.style.strokeDashoffset = offset;
+                    }
+
+                    // Verdict Badge
+                    if (verdictBadge && verdictText) {
+                        verdictBadge.style.display = "inline-flex";
+                        verdictBadge.className = `risk-badge risk-badge--${risk}`;
+                        verdictText.textContent = verdict;
+                    }
+                }
+
+                newsResult.style.display = "block";
+                newsResult.className = "alert alert--warning";
+                newsResult.style.borderWidth = "2px";
+                newsResult.style.maxHeight = "500px";
+                newsResult.style.overflowY = "auto";
+                
+                let html = `
+                    <div style="margin-bottom: 20px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
+                        <span style="font-size: 0.8em; opacity: 0.7; text-transform: uppercase;">${t.analysis_for}</span>
+                        <p style="font-weight: 700; color: #f0ece4; margin-top: 5px; font-size: 1.1em;">"${queryUsed}"</p>
+                    </div>
+                `;
+
+                // Related News (Strictly Relevant)
+                if (news.length > 0) {
+                    html += `<h4 style="margin-bottom: 12px; color: #a67c00; font-size: 0.9em; text-transform: uppercase;">${t.related_news}</h4>`;
+                    html += `<div style="display: grid; gap: 10px; margin-bottom: 25px;">`;
+                    news.forEach(item => {
+                        html += `
+                            <a href="${item.url}" target="_blank" style="display: block; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; text-decoration: none; border: 1px solid rgba(166,124,0,0.2); transition: all 0.2s;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <span style="font-size: 0.7em; color: #a67c00; font-weight: 700;">${item.source} (${item.relevance}%)</span>
+                                    <i data-lucide="external-link" style="width: 12px; height: 12px; opacity: 0.5;"></i>
+                                </div>
+                                <p style="font-size: 0.9em; color: #f0ece4; line-height: 1.4;">${item.title}</p>
+                            </a>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+
+                // Fact Checks
+                if (results.length > 0) {
+                    html += `<h4 style="margin-bottom: 12px; color: #a67c00; font-size: 0.9em; text-transform: uppercase;">${t.fact_checks}</h4>`;
+                    html += `<div style="display: grid; gap: 12px;">`;
+                    results.forEach(res => {
+                        const ratingColor = getRatingColor(res.rating);
+                        html += `
+                            <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; border-left: 4px solid ${ratingColor};">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="font-size: 0.7em; background: ${ratingColor}; color: #000; padding: 2px 6px; border-radius: 3px; font-weight: 800; text-transform: uppercase;">${res.rating}</span>
+                                    <span style="font-size: 0.75em; opacity: 0.6;">${res.publisher}</span>
+                                </div>
+                                <p style="font-size: 0.9em; line-height: 1.4; color: #f0ece4; margin-bottom: 8px;">${res.claim}</p>
+                                <a href="${res.url}" target="_blank" style="font-size: 0.8em; color: #a67c00; text-decoration: underline;">${t.read_more}</a>
                             </div>
                         `;
                     });
-                    
-                    resultsHtml += `</div>`;
-                    newsResult.innerHTML = resultsHtml;
-                } else {
-                    newsResult.className = "alert alert--success";
-                    newsResult.innerHTML = `<strong>${data.message}</strong><br><span style="font-size: 0.9em; opacity: 0.8;">No known disputes found in the Fact Check database.</span>`;
+                    html += `</div>`;
                 }
+
+                if (news.length === 0 && results.length === 0) {
+                    if (scoreContainer) scoreContainer.style.display = "none";
+                    newsResult.className = "alert alert--success";
+                    html = `
+                        <div style="display: flex; align-items: flex-start; gap: 15px; padding: 5px;">
+                            <i data-lucide="shield-check" style="color: #2ed573; width: 24px; height: 24px;"></i>
+                            <div>
+                                <strong style="font-size: 1.1em; display: block; margin-bottom: 4px;">${t.no_results}</strong>
+                                <p style="font-size: 0.9em; opacity: 0.8; line-height: 1.4;">${t.no_results_desc}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                newsResult.innerHTML = html;
             }
 
             if (window.lucide) lucide.createIcons();
@@ -570,11 +720,19 @@ function initFactCheck() {
         } catch (err) {
             newsResult.style.display = "block";
             newsResult.className = "alert alert--danger";
-            newsResult.innerHTML = `<strong>Error:</strong> Could not reach the server.`;
+            newsResult.innerHTML = `<strong>${newsTranslations[newsCurrentLang].error}:</strong> Could not reach the server.`;
         }
 
         newsSubmitBtn.innerHTML = originalText;
         newsSubmitBtn.disabled = false;
         if (window.lucide) lucide.createIcons();
     });
+}
+
+function getRatingColor(rating) {
+    const r = rating.toLowerCase();
+    if (r.includes('false') || r.includes('fake') || r.includes('wrong')) return '#ff4757';
+    if (r.includes('true') || r.includes('correct')) return '#2ed573';
+    if (r.includes('partially') || r.includes('mixed')) return '#ffa502';
+    return '#eccc68'; // Default gold-ish
 }

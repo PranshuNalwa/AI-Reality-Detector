@@ -323,19 +323,11 @@ def fact_check_route():
         return jsonify({"status": "error", "message": "No query provided."}), 400
 
     query = data["query"]
-    results = get_factcheck_results(query)
-
-    if not results:
-        return jsonify({
-            "status": "success",
-            "message": "No specific fact-check results found for this query.",
-            "results": []
-        })
+    result_data = get_factcheck_results(query)
 
     return jsonify({
         "status": "success",
-        "message": f"Found {len(results)} fact-check results.",
-        "results": results
+        "data": result_data
     })
 
 @app.route('/api/check-website', methods=['POST'])

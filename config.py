@@ -24,6 +24,7 @@ class Config:
     SIGHTENGINE_API_USER = os.getenv("SIGHTENGINE_API_USER", "")
     SIGHTENGINE_API_SECRET = os.getenv("SIGHTENGINE_API_SECRET", "")
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+    FACT_CHECK_API_KEY = os.getenv("FACT_CHECK_API_KEY", "")
 
     # File upload settings
     UPLOAD_FOLDER = os.path.join(
