@@ -1,99 +1,341 @@
 {% extends "base.html" %}
-{% block title %}Upload — AI Reality Detector{% endblock %}
+{% block title %}AI Reality Detector — Verify Before You Trust{% endblock %}
 
 {% block content %}
-<section class="hero">
-    <h1 class="hero__heading">Is this image <span class="gradient-text">real?</span></h1>
-    <p class="hero__sub">Upload a photo and our AI will tell you if it's been generated, manipulated, or is authentic.
-    </p>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HERO SECTION
+     ═══════════════════════════════════════════════════════════ -->
+<section class="hero" id="hero">
+    <div class="hero__particles" id="hero-particles"></div>
+    <div class="hero__content">
+        <h1 class="hero__heading">AI Reality <span class="gold-text">Detector</span></h1>
+        <p class="hero__sub">Verify Before You Trust</p>
+        <p class="hero__desc">
+            Advanced multimodal AI analysis to detect deepfakes, AI-generated text,
+            fake news, malicious QR codes, and phishing websites — all in one platform.
+        </p>
+        <a href="#features" class="btn btn--gold btn--lg hero__cta">
+            Verify Now
+            <span class="btn__arrow">→</span>
+        </a>
+    </div>
+    <div class="hero__glow"></div>
 </section>
 
-<section class="upload-section" id="upload-section">
-    <!-- Tabs -->
-    <div class="tabs">
-        <button class="tab-btn active" data-tab="image">Image Scan</button>
-        <button class="tab-btn" data-tab="qr">QR Code Scan</button>
-    </div>
-
-    <!-- Image Scan Panel -->
-    <div class="tab-content active" id="tab-image">
-        <form method="POST" enctype="multipart/form-data" class="upload-form" id="upload-form">
-            {{ form.hidden_tag() }}
-
-        <!-- Drag-and-drop zone -->
-        <div class="dropzone" id="dropzone">
-            <div class="dropzone__icon">⬆</div>
-            <p class="dropzone__text">Drag &amp; drop your image here</p>
-            <p class="dropzone__or">or</p>
-            <label for="file-input" class="btn btn--outline">Browse Files</label>
-            {{ form.image(id="file-input", class="dropzone__input", accept="image/jpeg,image/png") }}
-            <p class="dropzone__hint">JPG, JPEG, PNG &middot; Max 16 MB</p>
+<!-- ═══════════════════════════════════════════════════════════
+     STATS BAR
+     ═══════════════════════════════════════════════════════════ -->
+<section class="stats-bar">
+    <div class="stats-bar__inner">
+        <div class="stat">
+            <span class="stat__number" data-count="12500">0</span>
+            <span class="stat__label">Scans Today</span>
         </div>
-
-        <!-- Preview (hidden by default) -->
-        <div class="preview" id="preview" style="display:none;">
-            <img id="preview-img" src="#" alt="Preview" class="preview__img" />
-            <p id="preview-name" class="preview__name"></p>
-            <button type="button" class="btn btn--small btn--ghost" id="preview-clear">Remove</button>
+        <div class="stat">
+            <span class="stat__number" data-count="99.7">0</span>
+            <span class="stat__label">% Accuracy</span>
         </div>
-
-            <!-- Submit -->
-            <button type="submit" class="btn btn--primary btn--lg" id="submit-btn" disabled>
-                Analyze Image
-            </button>
-        </form>
-    </div>
-
-    <!-- QR Scan Panel -->
-    <div class="tab-content" id="tab-qr">
-        <form id="qr-form" class="upload-form">
-            <!-- Drag-and-drop zone -->
-            <div class="dropzone" id="qr-dropzone">
-                <div class="dropzone__icon">📷</div>
-                <p class="dropzone__text">Upload QR Code</p>
-                <p class="dropzone__or">or</p>
-                <label for="qr-file-input" class="btn btn--outline">Browse Files</label>
-                <input type="file" id="qr-file-input" class="dropzone__input" accept="image/jpeg,image/png,image/webp">
-                <p class="dropzone__hint">JPG, JPEG, PNG, WEBP</p>
-            </div>
-
-            <!-- Preview (hidden by default) -->
-            <div class="preview" id="qr-preview" style="display:none;">
-                <img id="qr-preview-img" src="#" alt="Preview" class="preview__img" />
-                <p id="qr-preview-name" class="preview__name"></p>
-                <button type="button" class="btn btn--small btn--ghost" id="qr-preview-clear">Remove</button>
-            </div>
-
-            <!-- Results -->
-            <div id="qr-result" style="display:none; margin-top: 1rem; padding: 1rem; border-radius: 8px; text-align: center;"></div>
-
-            <!-- Submit -->
-            <button type="button" class="btn btn--primary btn--lg" id="qr-submit-btn" disabled>
-                Scan QR
-            </button>
-        </form>
+        <div class="stat">
+            <span class="stat__number" data-count="5">0</span>
+            <span class="stat__label">Detection Modules</span>
+        </div>
+        <div class="stat">
+            <span class="stat__number" data-count="180">0</span>
+            <span class="stat__label">Countries Served</span>
+        </div>
     </div>
 </section>
 
-<!-- How it works -->
-<section class="how-it-works">
-    <h2>How it works</h2>
+<!-- ═══════════════════════════════════════════════════════════
+     FEATURE TABS SECTION
+     ═══════════════════════════════════════════════════════════ -->
+<section class="features" id="features">
+    <div class="section-header">
+        <h2 class="section-title">Detection <span class="gold-text">Modules</span></h2>
+        <p class="section-subtitle">Choose a module below to analyze your content</p>
+    </div>
+
+    <!-- Tab Buttons -->
+    <div class="tabs" id="feature-tabs">
+        <button class="tab-btn active" data-tab="images">
+            <i data-lucide="image" class="tab-icon"></i>
+            <span>Images</span>
+        </button>
+        <button class="tab-btn" data-tab="news">
+            <i data-lucide="newspaper" class="tab-icon"></i>
+            <span>News</span>
+        </button>
+        <button class="tab-btn" data-tab="texts">
+            <i data-lucide="file-text" class="tab-icon"></i>
+            <span>Texts</span>
+        </button>
+        <button class="tab-btn" data-tab="qr">
+            <i data-lucide="qr-code" class="tab-icon"></i>
+            <span>QR</span>
+        </button>
+        <button class="tab-btn" data-tab="websites">
+            <i data-lucide="globe" class="tab-icon"></i>
+            <span>Websites</span>
+        </button>
+    </div>
+
+    <!-- ── Tab Panels ──────────────────────────────── -->
+
+    <!-- IMAGES Panel -->
+    <div class="tab-panel active" id="panel-images">
+        <div class="panel-card">
+            <div class="panel-card__header">
+                <i data-lucide="scan-eye" class="panel-card__icon"></i>
+                <div>
+                    <h3>Deepfake Detection</h3>
+                    <p>Upload an image to detect AI-generated or manipulated visual content.</p>
+                </div>
+            </div>
+            <form method="POST" enctype="multipart/form-data" class="upload-form" id="image-upload-form">
+                {{ form.hidden_tag() }}
+                <div class="dropzone" id="image-dropzone">
+                    <div class="dropzone__icon-wrap">
+                        <i data-lucide="upload-cloud" class="dropzone__lucide"></i>
+                    </div>
+                    <p class="dropzone__text">Drag & drop your image here</p>
+                    <span class="dropzone__or">or</span>
+                    <label for="image-file-input" class="btn btn--outline-gold btn--sm">Browse Files</label>
+                    {{ form.image(id="image-file-input", class="dropzone__input", accept="image/jpeg,image/png") }}
+                    <p class="dropzone__hint">JPG, JPEG, PNG &middot; Max 16 MB</p>
+                </div>
+                <div class="preview" id="image-preview" style="display:none;">
+                    <img id="image-preview-img" src="#" alt="Preview" class="preview__img" />
+                    <p id="image-preview-name" class="preview__name"></p>
+                    <button type="button" class="btn btn--ghost btn--sm" id="image-preview-clear">Remove</button>
+                </div>
+                <button type="submit" class="btn btn--gold btn--lg btn--full" id="image-submit-btn" disabled>
+                    <i data-lucide="scan" class="btn__icon"></i> Analyze Image
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- NEWS Panel -->
+    <div class="tab-panel" id="panel-news">
+        <div class="panel-card">
+            <div class="panel-card__header">
+                <i data-lucide="newspaper" class="panel-card__icon"></i>
+                <div>
+                    <h3>News Credibility Check</h3>
+                    <p>Paste a news article URL or text to verify its credibility and detect misinformation.</p>
+                </div>
+            </div>
+            <form class="upload-form" id="news-form">
+                <div class="input-group">
+                    <label for="news-url" class="input-label">Article URL</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="link" class="input-icon"></i>
+                        <input type="url" id="news-url" class="text-input" placeholder="https://example.com/article..." />
+                    </div>
+                </div>
+                <div class="input-divider">
+                    <span>or paste text directly</span>
+                </div>
+                <div class="input-group">
+                    <label for="news-text" class="input-label">Article Text</label>
+                    <textarea id="news-text" class="text-input text-input--area" rows="6" placeholder="Paste the full article text here..."></textarea>
+                </div>
+                <button type="button" class="btn btn--gold btn--lg btn--full" id="news-submit-btn">
+                    <i data-lucide="shield-check" class="btn__icon"></i> Check Credibility
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TEXTS Panel -->
+    <div class="tab-panel" id="panel-texts">
+        <div class="panel-card">
+            <div class="panel-card__header">
+                <i data-lucide="file-text" class="panel-card__icon"></i>
+                <div>
+                    <h3>AI Text Detection</h3>
+                    <p>Paste any text to determine if it was written by a human or generated by an LLM.</p>
+                </div>
+            </div>
+            <form class="upload-form" id="text-form">
+                <div class="input-group">
+                    <label for="text-content" class="input-label">Text Content</label>
+                    <textarea id="text-content" class="text-input text-input--area text-input--tall" rows="10" placeholder="Paste the text you want to analyze..."></textarea>
+                    <div class="input-meta">
+                        <span id="text-char-count">0 characters</span>
+                        <span>Min 100 characters recommended</span>
+                    </div>
+                </div>
+                <button type="button" class="btn btn--gold btn--lg btn--full" id="text-submit-btn">
+                    <i data-lucide="brain" class="btn__icon"></i> Detect AI Text
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- QR Panel -->
+    <div class="tab-panel" id="panel-qr">
+        <div class="panel-card">
+            <div class="panel-card__header">
+                <i data-lucide="qr-code" class="panel-card__icon"></i>
+                <div>
+                    <h3>QR Code Scanner</h3>
+                    <p>Upload a QR code image to detect malicious links and potential phishing threats.</p>
+                </div>
+            </div>
+            <form class="upload-form" id="qr-upload-form">
+                <div class="dropzone" id="qr-dropzone">
+                    <div class="dropzone__icon-wrap">
+                        <i data-lucide="scan-line" class="dropzone__lucide"></i>
+                    </div>
+                    <p class="dropzone__text">Upload QR Code Image</p>
+                    <span class="dropzone__or">or</span>
+                    <label for="qr-file-input" class="btn btn--outline-gold btn--sm">Browse Files</label>
+                    <input type="file" id="qr-file-input" class="dropzone__input" accept="image/jpeg,image/png,image/webp" />
+                    <p class="dropzone__hint">JPG, PNG, WEBP</p>
+                </div>
+                <div class="preview" id="qr-preview" style="display:none;">
+                    <img id="qr-preview-img" src="#" alt="QR Preview" class="preview__img" />
+                    <p id="qr-preview-name" class="preview__name"></p>
+                    <button type="button" class="btn btn--ghost btn--sm" id="qr-preview-clear">Remove</button>
+                </div>
+                <div id="qr-result" class="result-box" style="display:none;"></div>
+                <button type="button" class="btn btn--gold btn--lg btn--full" id="qr-submit-btn" disabled>
+                    <i data-lucide="shield-alert" class="btn__icon"></i> Scan QR Code
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- WEBSITES Panel -->
+    <div class="tab-panel" id="panel-websites">
+        <div class="panel-card">
+            <div class="panel-card__header">
+                <i data-lucide="globe" class="panel-card__icon"></i>
+                <div>
+                    <h3>Website Verification</h3>
+                    <p>Enter a website URL to check for UI clones, phishing pages, and suspicious domains.</p>
+                </div>
+            </div>
+            <form class="upload-form" id="website-form">
+                <div class="input-group">
+                    <label for="website-url" class="input-label">Website URL</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="globe" class="input-icon"></i>
+                        <input type="url" id="website-url" class="text-input" placeholder="https://suspicious-site.com" />
+                    </div>
+                </div>
+                <button type="button" class="btn btn--gold btn--lg btn--full" id="website-submit-btn">
+                    <i data-lucide="search" class="btn__icon"></i> Verify Website
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HOW IT WORKS
+     ═══════════════════════════════════════════════════════════ -->
+<section class="how-it-works" id="how-it-works">
+    <div class="section-header">
+        <h2 class="section-title">How It <span class="gold-text">Works</span></h2>
+        <p class="section-subtitle">Three simple steps to verify any digital content</p>
+    </div>
     <div class="steps-grid">
         <div class="step-card">
-            <span class="step-card__num">1</span>
-            <h3>Upload</h3>
-            <p>Select or drag an image file (JPG/PNG).</p>
+            <div class="step-card__num-wrap"><span class="step-card__num">1</span></div>
+            <h3>Choose Module</h3>
+            <p>Select from five specialized detection modules tailored to different content types.</p>
         </div>
+        <div class="step-card__connector"><i data-lucide="chevron-right"></i></div>
         <div class="step-card">
-            <span class="step-card__num">2</span>
-            <h3>Analyze</h3>
-            <p>Our AI examines the image for signs of manipulation or AI generation.</p>
+            <div class="step-card__num-wrap"><span class="step-card__num">2</span></div>
+            <h3>Upload & Analyze</h3>
+            <p>Upload your file or paste content. Our AI engines process it in seconds.</p>
         </div>
+        <div class="step-card__connector"><i data-lucide="chevron-right"></i></div>
         <div class="step-card">
-            <span class="step-card__num">3</span>
-            <h3>Results</h3>
-            <p>Get a confidence score, key findings, and EXIF metadata report.</p>
+            <div class="step-card__num-wrap"><span class="step-card__num">3</span></div>
+            <h3>Get Verdict</h3>
+            <p>Receive a detailed authenticity report with confidence scores and key findings.</p>
         </div>
     </div>
 </section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PRICING SECTION
+     ═══════════════════════════════════════════════════════════ -->
+<section class="pricing" id="pricing">
+    <div class="section-header">
+        <h2 class="section-title">Choose Your <span class="gold-text">Plan</span></h2>
+        <p class="section-subtitle">Unlock the full power of AI Reality detection</p>
+    </div>
+    <div class="pricing-grid">
+        <!-- FREE -->
+        <div class="pricing-card">
+            <div class="pricing-card__header">
+                <h3 class="pricing-card__name">Free</h3>
+                <div class="pricing-card__price">
+                    <span class="pricing-card__amount">$0</span>
+                    <span class="pricing-card__period">/month</span>
+                </div>
+                <p class="pricing-card__desc">Get started with basic verification</p>
+            </div>
+            <ul class="pricing-card__features">
+                <li><i data-lucide="check" class="feature-check"></i> 10 Image scans/day</li>
+                <li><i data-lucide="check" class="feature-check"></i> 5 Text analyses/day</li>
+                <li><i data-lucide="check" class="feature-check"></i> Basic QR scanning</li>
+                <li><i data-lucide="x" class="feature-x"></i> News credibility check</li>
+                <li><i data-lucide="x" class="feature-x"></i> Website verification</li>
+                <li><i data-lucide="x" class="feature-x"></i> API access</li>
+            </ul>
+            <a href="#" class="btn btn--outline-gold btn--full">Get Started</a>
+        </div>
+
+        <!-- BASIC (Highlighted) -->
+        <div class="pricing-card pricing-card--featured">
+            <div class="pricing-card__badge">Most Popular</div>
+            <div class="pricing-card__header">
+                <h3 class="pricing-card__name">Basic</h3>
+                <div class="pricing-card__price">
+                    <span class="pricing-card__amount">$19</span>
+                    <span class="pricing-card__period">/month</span>
+                </div>
+                <p class="pricing-card__desc">Perfect for professionals and researchers</p>
+            </div>
+            <ul class="pricing-card__features">
+                <li><i data-lucide="check" class="feature-check"></i> 100 Image scans/day</li>
+                <li><i data-lucide="check" class="feature-check"></i> 50 Text analyses/day</li>
+                <li><i data-lucide="check" class="feature-check"></i> Advanced QR scanning</li>
+                <li><i data-lucide="check" class="feature-check"></i> News credibility check</li>
+                <li><i data-lucide="check" class="feature-check"></i> Website verification</li>
+                <li><i data-lucide="x" class="feature-x"></i> API access</li>
+            </ul>
+            <a href="#" class="btn btn--gold btn--full">Choose Basic</a>
+        </div>
+
+        <!-- PRO -->
+        <div class="pricing-card">
+            <div class="pricing-card__header">
+                <h3 class="pricing-card__name">Pro</h3>
+                <div class="pricing-card__price">
+                    <span class="pricing-card__amount">$49</span>
+                    <span class="pricing-card__period">/month</span>
+                </div>
+                <p class="pricing-card__desc">Enterprise-grade detection suite</p>
+            </div>
+            <ul class="pricing-card__features">
+                <li><i data-lucide="check" class="feature-check"></i> Unlimited scans</li>
+                <li><i data-lucide="check" class="feature-check"></i> Unlimited analyses</li>
+                <li><i data-lucide="check" class="feature-check"></i> All detection modules</li>
+                <li><i data-lucide="check" class="feature-check"></i> Priority processing</li>
+                <li><i data-lucide="check" class="feature-check"></i> Website verification</li>
+                <li><i data-lucide="check" class="feature-check"></i> Full API access</li>
+            </ul>
+            <a href="#" class="btn btn--outline-gold btn--full">Choose Pro</a>
+        </div>
+    </div>
+</section>
+
 {% endblock %}
