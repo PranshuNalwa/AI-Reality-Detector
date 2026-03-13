@@ -21,6 +21,7 @@ from app.utils.metadata_extractor import extract_metadata
 from app.utils.image_analysis import analyze_with_sightengine
 from app.qr_checker import decode_qr_image, analyze_payment_qr
 from app.utils.api_clients import check_url_safety
+from app.utils.fact_checker import get_factcheck_results
 from app.website_checker import verify_website
 
 
@@ -312,6 +313,30 @@ def scan_qr_route():
         return jsonify({"status": "error", "message": str(ve)}), 400
     except Exception as e:
         return jsonify({"status": "error", "message": "An internal server error occurred."}), 500
+
+
+@app.route("/api/fact-check", methods=["POST"])
+def fact_check_route():
+    """Handle fact-check requests from the frontend."""
+    data = request.json
+    if not data or "query" not in data:
+        return jsonify({"status": "error", "message": "No query provided."}), 400
+
+    query = data["query"]
+    results = get_factcheck_results(query)
+
+    if not results:
+        return jsonify({
+            "status": "success",
+            "message": "No specific fact-check results found for this query.",
+            "results": []
+        })
+
+    return jsonify({
+        "status": "success",
+        "message": f"Found {len(results)} fact-check results.",
+        "results": results
+    })
 
 @app.route('/api/check-website', methods=['POST'])
 def check_website_route():

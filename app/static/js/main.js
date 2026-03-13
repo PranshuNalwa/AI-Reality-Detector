@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initMeter();
     initShareBtn();
     initWebsiteCheck();
+    initFactCheck();
 });
 
 
@@ -497,5 +498,83 @@ function initShareBtn() {
             document.execCommand('copy');
             document.body.removeChild(ta);
         }
+    });
+}
+
+/* ── Fact Check AJAX Submission ────────────────────────── */
+function initFactCheck() {
+    const newsSubmitBtn = document.getElementById('news-submit-btn');
+    const newsText = document.getElementById('news-text');
+    const newsUrl = document.getElementById('news-url');
+    const newsResult = document.getElementById('news-result');
+
+    if (!newsSubmitBtn || !newsResult) return;
+
+    newsSubmitBtn.addEventListener('click', async () => {
+        const query = (newsText ? newsText.value.trim() : "") || (newsUrl ? newsUrl.value.trim() : "");
+        if (!query) {
+            newsResult.style.display = "block";
+            newsResult.className = "alert alert--danger";
+            newsResult.innerHTML = `<strong>Error:</strong> Please enter a news article URL or paste text.`;
+            return;
+        }
+
+        newsSubmitBtn.disabled = true;
+        const originalText = newsSubmitBtn.innerHTML;
+        newsSubmitBtn.innerHTML = '<i data-lucide="loader" class="btn__icon spinner"></i> Checking...';
+        if (window.lucide) lucide.createIcons();
+        
+        newsResult.style.display = "none";
+
+        try {
+            const response = await fetch("/api/fact-check", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ query: query })
+            });
+            const data = await response.json();
+
+            newsResult.style.display = "block";
+            
+            if (data.status === "error") {
+                newsResult.className = "alert alert--danger";
+                newsResult.innerHTML = `<strong>Error:</strong> ${data.message}`;
+            } else if (data.status === "success") {
+                if (data.results && data.results.length > 0) {
+                    newsResult.className = "alert alert--warning";
+                    let resultsHtml = `<strong>${data.message}</strong><div style="margin-top: 15px; display: grid; gap: 10px;">`;
+                    
+                    data.results.forEach(res => {
+                        resultsHtml += `
+                            <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 6px; text-align: left;">
+                                <p style="margin-bottom: 5px; font-size: 0.95em;"><strong>Claim:</strong> ${res.claim}</p>
+                                <p style="margin-bottom: 5px; font-size: 0.9em; color: #f0ece4;"><strong>Rating:</strong> <span style="color: #ffcc00">${res.rating}</span></p>
+                                <p style="margin-bottom: 5px; font-size: 0.85em; opacity: 0.8;"><strong>Source:</strong> ${res.publisher}</p>
+                                <a href="${res.url}" target="_blank" style="font-size: 0.8em; color: #a67c00; text-decoration: underline;">View Full Review</a>
+                            </div>
+                        `;
+                    });
+                    
+                    resultsHtml += `</div>`;
+                    newsResult.innerHTML = resultsHtml;
+                } else {
+                    newsResult.className = "alert alert--success";
+                    newsResult.innerHTML = `<strong>${data.message}</strong><br><span style="font-size: 0.9em; opacity: 0.8;">No known disputes found in the Fact Check database.</span>`;
+                }
+            }
+
+            if (window.lucide) lucide.createIcons();
+
+        } catch (err) {
+            newsResult.style.display = "block";
+            newsResult.className = "alert alert--danger";
+            newsResult.innerHTML = `<strong>Error:</strong> Could not reach the server.`;
+        }
+
+        newsSubmitBtn.innerHTML = originalText;
+        newsSubmitBtn.disabled = false;
+        if (window.lucide) lucide.createIcons();
     });
 }
