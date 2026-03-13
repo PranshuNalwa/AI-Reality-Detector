@@ -4,9 +4,13 @@ Run with: python run.py
 """
 import os
 
-# Fix for PyZbar on Apple Silicon Macs
-if os.path.exists('/opt/homebrew/lib'):
-    os.environ['DYLD_LIBRARY_PATH'] = '/opt/homebrew/lib:' + os.environ.get('DYLD_LIBRARY_PATH', '')
+# Fix for PyZbar on Windows (Python 3.8+)
+if os.name == 'nt':
+    import site
+    for path in site.getsitepackages():
+        pyzbar_path = os.path.join(path, 'pyzbar')
+        if os.path.isdir(pyzbar_path):
+            os.add_dll_directory(pyzbar_path)
 
 from app import app
 

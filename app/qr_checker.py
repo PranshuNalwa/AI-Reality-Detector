@@ -1,7 +1,11 @@
 import cv2
 import numpy as np
 import urllib.parse
-from pyzbar.pyzbar import decode
+try:
+    from pyzbar.pyzbar import decode
+    PYZBAR_AVAILABLE = True
+except Exception:
+    PYZBAR_AVAILABLE = False
 
 # Initialize once when the module loads
 qr_detector = cv2.QRCodeDetector()
@@ -43,10 +47,14 @@ def decode_qr_image(file_bytes):
     if img is None:
         raise ValueError("Invalid image format.")
 
-    # Try pyzbar first for robust decoding (handles logos well)
-    decoded_objects = decode(img)
-    if decoded_objects:
-        return decoded_objects[0].data.decode('utf-8')
+    # Try pyzbar first for robust decoding (handles logos well) if available
+    if PYZBAR_AVAILABLE:
+        try:
+            decoded_objects = decode(img)
+            if decoded_objects:
+                return decoded_objects[0].data.decode('utf-8')
+        except Exception:
+            pass
 
     # Fallback to OpenCV simple detector
     data, bbox, _ = qr_detector.detectAndDecode(img)
