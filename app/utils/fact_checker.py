@@ -50,13 +50,8 @@ def get_factcheck_results(query):
     """
     Search for fact-check claims and related news articles.
     """
-<<<<<<< Updated upstream
-    api_key = os.environ.get("FACT_CHECK_API_KEY") or os.environ.get("GOOGLE_SAFE_BROWSING_API")
-    
-    if not api_key or api_key == "FACT_CHECK_API_KEY":
-        # Cannot connect without an API key
-        return []
-=======
+
+
     api_key = current_app.config.get("FACT_CHECK_API_KEY")
     search_query = query.strip()
     
@@ -72,7 +67,7 @@ def get_factcheck_results(query):
                     search_query = title.strip()
         except Exception:
             pass
->>>>>>> Stashed changes
+
 
     # 1. Get Google Fact Check Results
     fact_checks = []
