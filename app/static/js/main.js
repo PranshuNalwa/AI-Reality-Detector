@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavbar();
     initTabs();
     initDropzones();
+    initQrUpload();
     initParticles();
     initStatsCounter();
     initScrollReveal();
@@ -172,6 +173,79 @@ function setupDropzone(cfg) {
             if (submitBtn) submitBtn.disabled = true;
         });
     }
+}
+
+/* ── QR AJAX Submission ────────────────────────────────── */
+function initQrUpload() {
+    const submitBtn = document.getElementById('qr-submit-btn');
+    const fileInput = document.getElementById('qr-file-input');
+    const resultDiv = document.getElementById('qr-result');
+
+    if (!submitBtn || !fileInput || !resultDiv) return;
+
+    submitBtn.addEventListener('click', async () => {
+        if (!fileInput.files.length) return;
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        submitBtn.disabled = true;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i data-lucide="loader" class="btn__icon spinner"></i> Scanning...';
+        if (window.lucide) lucide.createIcons();
+        
+        resultDiv.style.display = "none";
+
+        try {
+            const response = await fetch("/api/scan-qr", {
+                method: "POST",
+                body: formData
+            });
+            const data = await response.json();
+
+            resultDiv.style.display = "block";
+            
+            if (data.status === "error") {
+                resultDiv.className = "alert alert--danger";
+                resultDiv.innerHTML = `<strong>Error:</strong> ${data.message}`;
+            } else if (data.status === "success") {
+                resultDiv.className = "alert alert--success";
+                resultDiv.innerHTML = `<strong>${data.message}:</strong> <a href="${data.data}" target="_blank" style="word-break: break-all; color: inherit; text-decoration: underline;">${data.data}</a>`;
+            } else if (data.status === "warning") {
+                resultDiv.className = "alert alert--warning";
+                resultDiv.innerHTML = `<strong>${data.message}:</strong> <span style="word-break: break-all;">${data.data}</span>`;
+            } else if (data.status === "critical") {
+                // Massive warning for payments
+                resultDiv.className = "alert alert--danger";
+                resultDiv.style.borderWidth = "2px";
+                resultDiv.style.padding = "20px";
+                resultDiv.innerHTML = `
+                    <div style="font-size: 1.2rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">
+                        <i data-lucide="alert-triangle" style="vertical-align: middle; margin-right: 8px;"></i>
+                        <strong>${data.message}</strong>
+                    </div>
+                    <div style="text-align: left; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                        <p style="margin-bottom: 5px; color: #f0ece4;"><strong>Type:</strong> ${data.details.type}</p>
+                        <p style="margin-bottom: 5px; color: #f0ece4;"><strong>Payee Name:</strong> ${data.details.payee_name}</p>
+                        <p style="margin-bottom: 5px; color: #f0ece4;"><strong>UPI ID (VPA):</strong> ${data.details.payee_vpa}</p>
+                        <p style="margin-bottom: 5px; color: #f0ece4;"><strong>Amount (INR):</strong> ${data.details.amount}</p>
+                        <p style="margin-top: 10px; font-size: 0.85em; opacity: 0.8; word-break: break-all; color: #f0ece4;">Raw URI: ${data.data}</p>
+                    </div>
+                `;
+            }
+
+            if (window.lucide) lucide.createIcons();
+
+        } catch (err) {
+            resultDiv.style.display = "block";
+            resultDiv.className = "alert alert--danger";
+            resultDiv.innerHTML = `<strong>Error:</strong> Could not reach the server.`;
+        }
+
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        if (window.lucide) lucide.createIcons();
+    });
 }
 
 /* ── Floating Particles ────────────────────────────────── */

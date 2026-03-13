@@ -19,7 +19,7 @@ from app.forms import UploadForm
 from app.utils.helpers import save_upload, delete_file
 from app.utils.metadata_extractor import extract_metadata
 from app.utils.image_analysis import analyze_with_sightengine
-from app.qr_checker import decode_qr_image
+from app.qr_checker import decode_qr_image, analyze_payment_qr
 from app.utils.api_clients import check_url_safety
 
 
@@ -284,7 +284,19 @@ def scan_qr_route():
         if not decoded_data:
             return jsonify({"status": "error", "message": "No readable QR code found."}), 400
 
-        # 2. Check the data using the API client
+        # 2. Check for Payment Scams FIRST
+        payment_info = analyze_payment_qr(decoded_data)
+        
+        if payment_info["is_payment"]:
+            return jsonify({
+                "status": "critical", 
+                "type": "payment_alert",
+                "data": decoded_data,
+                "details": payment_info,
+                "message": payment_info["message"]
+            })
+
+        # 3. Check the data using the API client
         if decoded_data.startswith("http://") or decoded_data.startswith("https://"):
             safety_report = check_url_safety(decoded_data)
             
