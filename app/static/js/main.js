@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initShareBtn();
     initWebsiteCheck();
     initFactCheck();
+    initTextCheck();
 });
 
 
@@ -413,6 +414,118 @@ function initTextCounter() {
     textarea.addEventListener('input', () => {
         const len = textarea.value.length;
         counter.textContent = len.toLocaleString() + ' characters';
+    });
+}
+
+/* ── AI Text Detection AJAX Submission ─────────────────── */
+function initTextCheck() {
+    const submitBtn = document.getElementById('text-submit-btn');
+    const textarea = document.getElementById('text-content');
+    const resultDiv = document.getElementById('text-result');
+
+    if (!submitBtn || !textarea || !resultDiv) return;
+
+    submitBtn.addEventListener('click', async () => {
+        const text = textarea.value.trim();
+        if (text.length < 50) {
+            resultDiv.style.display = "block";
+            resultDiv.className = "alert alert--danger";
+            resultDiv.innerHTML = `<strong>Error:</strong> Please provide at least 50 characters for accurate analysis.`;
+            return;
+        }
+
+        submitBtn.disabled = true;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i data-lucide="loader" class="btn__icon spinner"></i> Analyzing Text...';
+        if (window.lucide) lucide.createIcons();
+        
+        resultDiv.style.display = "none";
+        
+        const scoreContainer = document.getElementById('text-score-container');
+        if (scoreContainer) scoreContainer.style.display = "none";
+
+        try {
+            const response = await fetch("/api/check-text", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text })
+            });
+            const resData = await response.json();
+
+            resultDiv.style.display = "block";
+            
+            if (resData.status === "error") {
+                resultDiv.className = "alert alert--danger";
+                resultDiv.innerHTML = `<strong>Error:</strong> ${resData.message}`;
+            } else if (resData.status === "success") {
+                const data = resData.data;
+                const score = data.score;
+                const verdict = data.verdict;
+
+                // Animate Score Meter
+                const scoreValue = document.getElementById('text-score-value');
+                const meterFill = document.getElementById('text-meter-fill');
+                const meterEl = document.getElementById('text-meter');
+                const verdictBadge = document.getElementById('text-verdict-badge');
+                const verdictText = document.getElementById('text-verdict-text');
+
+                if (scoreContainer) {
+                    scoreContainer.style.display = "block";
+                    
+                    // Risk level coloring (Higher score = More likely AI = Higher Risk for "Reality")
+                    let risk = "medium";
+                    if (score >= 60) risk = "high";
+                    else if (score <= 30) risk = "low";
+                    if (meterEl) meterEl.setAttribute('data-risk', risk);
+
+                    // Animate number
+                    let currentScore = 0;
+                    const duration = 1500;
+                    const startTime = performance.now();
+
+                    function animateScore(now) {
+                        const elapsed = now - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        currentScore = Math.floor(progress * score);
+                        if (scoreValue) scoreValue.textContent = currentScore;
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animateScore);
+                        }
+                    }
+                    requestAnimationFrame(animateScore);
+
+                    // Animate circle
+                    const radius = 45;
+                    const circumference = 2 * Math.PI * radius;
+                    if (meterFill) {
+                        const offset = circumference - (score / 100) * circumference;
+                        meterFill.style.strokeDashoffset = offset;
+                    }
+
+                    // Verdict Badge
+                    if (verdictBadge && verdictText) {
+                        verdictBadge.style.display = "inline-flex";
+                        verdictBadge.className = `risk-badge risk-badge--${risk}`;
+                        verdictText.textContent = verdict;
+                    }
+                }
+
+                resultDiv.className = "alert alert--warning";
+                resultDiv.innerHTML = `<strong>${data.message}</strong>`;
+            }
+
+            if (window.lucide) lucide.createIcons();
+
+        } catch (err) {
+            resultDiv.style.display = "block";
+            resultDiv.className = "alert alert--danger";
+            resultDiv.innerHTML = `<strong>Error:</strong> Could not reach the server.`;
+        }
+
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        if (window.lucide) lucide.createIcons();
     });
 }
 

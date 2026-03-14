@@ -22,6 +22,7 @@ from app.utils.image_analysis import analyze_with_sightengine
 from app.qr_checker import decode_qr_image, analyze_payment_qr
 from app.utils.api_clients import check_url_safety
 from app.utils.fact_checker import get_factcheck_results
+from app.utils.text_analysis import analyze_text_with_sapling
 from app.website_checker import verify_website
 
 
@@ -314,6 +315,29 @@ def scan_qr_route():
     except Exception as e:
         return jsonify({"status": "error", "message": "An internal server error occurred."}), 500
 
+@app.route("/api/check-text", methods=["POST"])
+def check_text_route():
+    """Handle AI text detection requests."""
+    data = request.json
+    if not data or "text" not in data:
+        return jsonify({"status": "error", "message": "No text provided."}), 400
+
+    text_content = data["text"].strip()
+    if len(text_content) < 50:
+        return jsonify({"status": "error", "message": "Text is too short for accurate analysis. Please provide at least 50 characters."}), 400
+
+    result = analyze_text_with_sapling(text_content)
+    
+    if result.get("error"):
+        return jsonify({
+            "status": "error",
+            "message": result.get("message")
+        }), 500
+        
+    return jsonify({
+        "status": "success",
+        "data": result
+    })
 
 @app.route("/api/fact-check", methods=["POST"])
 def fact_check_route():
