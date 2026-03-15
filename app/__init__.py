@@ -25,4 +25,7 @@ db.init_app(app)
 # Create database tables and import routes inside the app context
 with app.app_context():
     from app import routes  # noqa: F401
-    db.create_all()
+    try:
+        db.create_all()
+    except Exception as e:
+        app.logger.error(f"Failed to initialize database: {str(e)}")

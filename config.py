@@ -17,11 +17,23 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
 
     # SQLAlchemy settings
-    # Use DATABASE_URL for Postgres (Vercel/Heroku/Railway), fallback to local SQLite
-    _db_url = os.getenv("DATABASE_URL", "sqlite:///site.db")
-    # Fix for SQLAlchemy 1.4+ which requires 'postgresql://' instead of 'postgres://'
-    if _db_url.startswith("postgres://"):
-        _db_url = _db_url.replace("postgres://", "postgresql://", 1)
+    # Try common Postgres env vars (Vercel, Heroku, Railway, etc.)
+    _db_url = (
+        os.getenv("DATABASE_URL") or 
+        os.getenv("POSTGRES_URL") or 
+        os.getenv("POSTGRES_URL_NON_POOLING")
+    )
+
+    if _db_url:
+        # Fix for SQLAlchemy 1.4+ which requires 'postgresql://' instead of 'postgres://'
+        if _db_url.startswith("postgres://"):
+            _db_url = _db_url.replace("postgres://", "postgresql://", 1)
+    else:
+        # Fallback to local SQLite - use /tmp on Vercel because root is read-only
+        if os.getenv("VERCEL"):
+            _db_url = "sqlite:////tmp/site.db"
+        else:
+            _db_url = "sqlite:///site.db"
     
     SQLALCHEMY_DATABASE_URI = _db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
