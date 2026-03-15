@@ -8,4 +8,5 @@ Werkzeug==2.3.7
 opencv-python-headless==4.13.0.92
 numpy==2.4.3
 qrcode[pil]==8.2
-pyzbar==0.1.9
+psycopg2-binary==2.9.9
+beautifulsoup4==4.12.2

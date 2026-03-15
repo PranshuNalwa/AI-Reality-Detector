@@ -1,0 +1,15 @@
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+.env
+instance/
+*.db
+.vscode/
+.idea/
+.DS_Store
+preview-results.html
+preview.html
+app/static/uploads/*
+!app/static/uploads/.gitkeep
